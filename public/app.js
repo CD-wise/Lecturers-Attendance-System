@@ -1,11 +1,11 @@
 // Firebase Configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyD2addos6sDcvCMj2tK8nS8IgBhhUwApfo",
+    apiKey: "",
     authDomain: "lecturers-attendance-system.firebaseapp.com",
     projectId: "lecturers-attendance-system",
     storageBucket: "lecturers-attendance-system.firebasestorage.app",
-    messagingSenderId: "446272728042",
-    appId: "1:446272728042:web:477c17d7f9d2da28ab6093"
+    messagingSenderId: "",
+    appId: ""
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
