@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Attendance System</title>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo-title">
+            <img src="image/atu-logo.png" alt="ATU Logo" class="logo">
+            <h1>ATU-Applied Science Lecturers Attendance System</h1>
+        </div>
+        <button class="btn" id="logoutBtn" style="display: none;">Logout</button>
+    </div>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginForm" class="login-container">
+            <h2>Class Representative Login</h2>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" class="form-control" required>
+            </div>
+            <button class="btn" onclick="login()">Login</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" style="display: none;">
+            <div class="card">
+                <h2>Record Attendance</h2>
+                <form class="attendance-form" id="attendanceForm">
+                    <!-- Department Selection -->
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select id="department" class="form-control" required>
+                            <option value="">Select Department</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Medical Laboratory Technology">Medical Laboratory Technology</option>
+                            <option value="Science Laboratory Technology">Science Laboratory Technology</option>
+                            <option value="Applied Mathematics and Statistics">Applied Mathematics and Statistics</option>
+                        </select>
+                    </div>
+
+                    <!-- Programme Level -->
+                    <div class="form-group">
+                        <label>Programme Level</label>
+                        <select id="programmeLevel" class="form-control" required>
+                            <option value="">Select Level</option>
+                            <option value="HND 100">HND 100</option>
+                            <option value="HND 200">HND 200</option>
+                            <option value="HND 300">HND 300</option>
+                            <option value="BTECH 300">BTECH 300</option>
+                            <option value="BTECH 400">BTECH 400</option>
+                        </select>
+                    </div>
+
+                    <!-- Class Entry -->
+                    <div class="form-group">
+                        <label>Class</label>
+                        <input type="text" id="class" class="form-control" required placeholder="e.g., CPS 1B">
+                    </div>
+
+                    <!-- Course Information -->
+                    <div class="form-group">
+                        <label>Course Code</label>
+                        <input type="text" id="course" class="form-control" required pattern="[A-Z]{3}\d{3}" title="Course code must follow the pattern ABC123">
+                    </div>
+                    <div class="form-group">
+                        <label>Course Title</label>
+                        <input type="text" id="courseTitle" class="form-control" required placeholder="e.g., Introduction to Programming">
+                    </div>
+
+                    <!-- Lecturer Information -->
+                    <div class="form-group">
+                        <label>Lecturer Name</label>
+                        <input type="text" id="lecturer" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Lecturer Status</label>
+                        <select id="status" class="form-control" required>
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                            <option value="ta">TA</option>
+                        </select>
+                    </div>
+
+                    <!-- Time and Date -->
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" id="time" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="date" class="form-control" required>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="comments" class="form-control" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn">Add Record</button>
+                </form>
+            </div>
+
+            <!-- Reports Section -->
+            <div class="card">
+                <h2>Generate Reports</h2>
+                <div class="report-buttons">
+                    <button class="btn" onclick="generateReport('weekly')">Weekly Report</button>
+                    <button class="btn" onclick="generateReport('monthly')">Monthly Report</button>
+                    <button class="btn" onclick="generateReport('semester')">Semester Report</button>
+                </div>
+            </div>
+
+            <!-- Records Table -->
+            <div class="card">
+                <h2>Recent Records</h2>
+                <div id="loading" style="display: none;">Loading records...</div>
+                <table id="recordsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Department</th>
+                            <th>Level</th>
+                            <th>Class</th>
+                            <th>Course Code</th>
+                            <th>Course Title</th>
+                            <th>Lecturer</th>
+                            <th>Lecturer Status</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Record</h2>
+            <form id="editForm" class="attendance-form">
+                <input type="hidden" id="editId">
+                <!-- Department Selection -->
+                <div class="form-group">
+                    <label>Department</label>
+                    <select id="editDepartment" class="form-control" required>
+                        <option value="">Select Department</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Medical Laboratory Technology">Medical Laboratory Technology</option>
+                        <option value="Science Laboratory Technology">Science Laboratory Technology</option>
+                        <option value="Applied Mathematics and Statistics">Applied Mathematics and Statistics</option>
+                    </select>
+                </div>
+
+                <!-- Programme Level -->
+                <div class="form-group">
+                    <label>Programme Level</label>
+                    <select id="editProgrammeLevel" class="form-control" required>
+                        <option value="">Select Level</option>
+                        <option value="HND 100">HND 100</option>
+                        <option value="HND 200">HND 200</option>
+                        <option value="HND 300">HND 300</option>
+                        <option value="BTECH 300">BTECH 300</option>
+                        <option value="BTECH 400">BTECH 400</option>
+                    </select>
+                </div>
+
+                <!-- Class Entry -->
+                <div class="form-group">
+                    <label>Class</label>
+                    <input type="text" id="editClass" class="form-control" required>
+                </div>
+
+                <!-- Course Information -->
+                <div class="form-group">
+                    <label>Course Code</label>
+                    <input type="text" id="editCourse" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Course Title</label>
+                    <input type="text" id="editCourseTitle" class="form-control" required>
+                </div>
+
+                <!-- Other Fields -->
+                <div class="form-group">
+                    <label>Lecturer Name</label>
+                    <input type="text" id="editLecturer" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Lecturer Status</label>
+                    <select id="editStatus" class="form-control" required>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="ta">TA</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Time</label>
+                    <input type="time" id="editTime" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="editDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Comments</label>
+                    <textarea id="editComments" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn">Save Changes</button>
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>n
