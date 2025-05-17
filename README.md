@@ -76,18 +76,4 @@ This project is licensed under the MIT License. Feel free to use, modify, and co
 
 ⭐ Show Support
 If you found this project useful, please ⭐ star the repo and share it with others!
-
 ---
-
-### 📘 Description for GitHub Repo (Use this for the repo's **"About"** section):
-
-> A web-based system for recording and tracking lecturers' attendance. Built with HTML, CSS, JavaScript, and Firebase for real-time database functionality.
-
----
-
-Let me know if you want me to:
-- Add screenshots to your README  
-- Create a hosted version (Firebase hosting guide)  
-- Connect it with a login system (admin/student roles)  
-
-I'm ready to help!
